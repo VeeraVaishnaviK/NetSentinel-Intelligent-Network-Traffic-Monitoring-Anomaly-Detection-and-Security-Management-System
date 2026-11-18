@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# SQLite transient files (keep schema/db clean; netsentinel.db is auto-created at runtime)
+*.db-wal
+*.db-shm
+*.db-journal
+backend/netsentinel.db
+
+# Node / Vite Frontend
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
