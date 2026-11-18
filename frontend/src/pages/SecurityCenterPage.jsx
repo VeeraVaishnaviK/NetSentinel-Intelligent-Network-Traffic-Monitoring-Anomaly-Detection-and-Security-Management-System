@@ -27,7 +27,7 @@ export default function SecurityCenterPage() {
   const [testingRule, setTestingRule] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [actionError, setActionError] = useState(null);
-  const [activeTab, setActiveTab] = useState('alerts'); // 'alerts' | 'rules'
+  const [activeTab, setActiveTab] = useState('alerts');
 
   const {
     data: summary,
@@ -132,24 +132,23 @@ export default function SecurityCenterPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">Security Center</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h1 className="ns-page-title">Security Center</h1>
+          <p className="ns-page-subtitle">
             Explainable rule-based network anomaly detection, alert triage, and threshold management.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-navy-900 border border-slate-800 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-white dark:bg-navy-900 border border-[#cde0ea] dark:border-slate-800 rounded-xl p-1 shadow-card">
           <button
             type="button"
             onClick={() => setActiveTab('alerts')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               activeTab === 'alerts'
-                ? 'bg-sky-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#244a5c] dark:bg-sky-600 text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-[#eef6fa] dark:hover:bg-navy-800'
             }`}
           >
             Alerts ({summary?.total_alerts ?? alerts.length})
@@ -157,10 +156,10 @@ export default function SecurityCenterPage() {
           <button
             type="button"
             onClick={() => setActiveTab('rules')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               activeTab === 'rules'
-                ? 'bg-sky-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#244a5c] dark:bg-sky-600 text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-[#eef6fa] dark:hover:bg-navy-800'
             }`}
           >
             Detection Rules ({summary?.active_rules_count ?? 5}/{summary?.total_rules_count ?? 5})
@@ -169,24 +168,28 @@ export default function SecurityCenterPage() {
       </div>
 
       {/* Academic Disclaimer */}
-      <div className="rounded-xl border border-sky-500/25 bg-sky-500/10 px-4 py-3 flex items-start gap-2.5 text-xs text-sky-200">
-        <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+      <div className="rounded-2xl border border-[#bfdceb] dark:border-sky-500/25 bg-white dark:bg-sky-500/10 px-4 py-3 flex items-start gap-2.5 text-xs text-slate-600 dark:text-sky-200 shadow-card">
+        <Info className="w-4 h-4 text-[#244a5c] dark:text-sky-400 shrink-0 mt-0.5" />
         <span>
-          <strong>Advisory Notice:</strong> NetSentinel uses configurable rule-based heuristics to
-          highlight suspicious network patterns for investigation. Alerts are indicators only and
-          must not be treated as definitive proof of malicious activity.
+          <strong className="text-[#1a3342] dark:text-sky-300">Advisory Notice:</strong> NetSentinel
+          uses configurable rule-based heuristics to highlight suspicious network patterns for
+          investigation. Alerts are indicators only and are not definitive proof of malicious activity.
         </span>
       </div>
 
-      <ErrorBanner message={sumErr || alertsErr || actionError} onRetry={refreshAlerts} />
+      <ErrorBanner
+        message={sumErr || alertsErr || actionError}
+        onRetry={refreshAlerts}
+        onDismiss={() => setActionError(null)}
+      />
 
       {feedback && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-200 flex items-center justify-between">
+        <div className="rounded-2xl border border-[#b7e4cd] dark:border-emerald-500/30 bg-[#e8f8f0] dark:bg-emerald-500/10 px-4 py-2.5 text-xs text-[#176442] dark:text-emerald-200 flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             {feedback}
           </span>
-          <button type="button" onClick={() => setFeedback(null)} className="text-emerald-300">
+          <button type="button" onClick={() => setFeedback(null)}>
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -199,7 +202,8 @@ export default function SecurityCenterPage() {
           value={formatNumber(summary?.open_alerts || 0)}
           subtext={`Critical: ${summary?.open_by_severity?.Critical || 0} · High: ${summary?.open_by_severity?.High || 0}`}
           icon={ShieldAlert}
-          accent={(summary?.open_alerts || 0) > 0 ? 'red' : 'emerald'}
+          accent={(summary?.open_alerts || 0) > 0 ? 'peach' : 'emerald'}
+          variant={(summary?.open_alerts || 0) > 0 ? 'alert' : 'default'}
           mono
         />
         <StatCard
@@ -215,7 +219,7 @@ export default function SecurityCenterPage() {
           value={formatNumber(summary?.resolved_alerts || 0)}
           subtext={`Total logged: ${formatNumber(summary?.total_alerts || 0)}`}
           icon={ShieldCheck}
-          accent="emerald"
+          accent="mint"
           mono
         />
         <StatCard
@@ -228,17 +232,18 @@ export default function SecurityCenterPage() {
         />
       </div>
 
-      {/* Controlled Test Traffic Bar for Academic Viva / Validation */}
+      {/* Controlled Test Traffic Bar */}
       <div className="ns-card p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <FlaskConical className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-2 rounded-xl bg-[#fef0dc] dark:bg-amber-500/15 text-[#9a5514] dark:text-amber-400 shrink-0">
+            <FlaskConical className="w-4 h-4" />
+          </div>
           <div className="text-xs">
-            <div className="font-semibold text-slate-200">
+            <div className="font-bold text-[#1a3342] dark:text-slate-200">
               Controlled Rule Verification (Synthetic Test Traffic)
             </div>
-            <p className="text-slate-400 mt-0.5">
-              Feed controlled synthetic events into the real detection engine to verify thresholds
-              safely without generating live network floods.
+            <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+              Feed controlled synthetic events into the real detection engine to verify thresholds safely.
             </p>
           </div>
         </div>
@@ -254,7 +259,7 @@ export default function SecurityCenterPage() {
               type="button"
               disabled={Boolean(testingRule)}
               onClick={() => handleControlledTest(btn.key)}
-              className="ns-btn-secondary !py-1.5 !px-2.5 !text-xs"
+              className="ns-btn-secondary !py-1.5 !px-3 !text-xs"
             >
               {testingRule === btn.key ? 'Testing...' : btn.label}
             </button>
@@ -264,10 +269,11 @@ export default function SecurityCenterPage() {
 
       {activeTab === 'alerts' ? (
         <div className="space-y-4">
-          {/* Filters */}
           <div className="ns-card p-4 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-400">Severity:</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Severity:
+              </label>
               <select
                 value={severityFilter}
                 onChange={(e) => setSeverityFilter(e.target.value)}
@@ -281,7 +287,9 @@ export default function SecurityCenterPage() {
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-400">Status:</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Status:
+              </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -300,14 +308,13 @@ export default function SecurityCenterPage() {
                   setSeverityFilter('');
                   setStatusFilter('');
                 }}
-                className="text-xs text-sky-400 hover:text-sky-300"
+                className="text-xs font-medium text-[#244a5c] dark:text-sky-400 hover:underline"
               >
                 Clear Filters
               </button>
             )}
           </div>
 
-          {/* Alerts Feed */}
           {alerts.length === 0 ? (
             <div className="ns-card">
               <EmptyState
@@ -331,12 +338,9 @@ export default function SecurityCenterPage() {
           )}
         </div>
       ) : (
-        /* Configurable Rules Editor */
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-100">
-              Configurable Anomaly Detection Rules
-            </h2>
+            <h2 className="ns-section-title">Configurable Anomaly Detection Rules</h2>
             <button
               type="button"
               disabled={savingRules || !rulesDraft}
@@ -354,8 +358,10 @@ export default function SecurityCenterPage() {
                 <div key={key} className="ns-card p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-100">{rule.name}</h3>
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      <h3 className="text-sm font-bold text-[#1a3342] dark:text-slate-100">
+                        {rule.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                         {rule.description}
                       </p>
                     </div>
@@ -364,17 +370,25 @@ export default function SecurityCenterPage() {
                         type="checkbox"
                         checked={Boolean(rule.enabled)}
                         onChange={(e) => handleRuleFieldChange(key, 'enabled', e.target.checked)}
-                        className="rounded border-slate-600 bg-navy-900 text-sky-500"
+                        className="rounded border-slate-400 text-[#244a5c]"
                       />
-                      <span className={rule.enabled ? 'text-emerald-400' : 'text-slate-500'}>
+                      <span
+                        className={
+                          rule.enabled
+                            ? 'text-[#176442] dark:text-emerald-400 font-semibold'
+                            : 'text-slate-400'
+                        }
+                      >
                         {rule.enabled ? 'Enabled' : 'Disabled'}
                       </span>
                     </label>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#e4eff5] dark:border-slate-800">
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1">Severity</label>
+                      <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                        Severity
+                      </label>
                       <select
                         value={rule.severity || 'Medium'}
                         onChange={(e) => handleRuleFieldChange(key, 'severity', e.target.value)}
@@ -389,7 +403,7 @@ export default function SecurityCenterPage() {
 
                     {rule.distinct_ports_threshold !== undefined && (
                       <div>
-                        <label className="block text-[11px] text-slate-400 mb-1">
+                        <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                           Distinct Ports Threshold
                         </label>
                         <input
@@ -397,11 +411,7 @@ export default function SecurityCenterPage() {
                           min="2"
                           value={rule.distinct_ports_threshold}
                           onChange={(e) =>
-                            handleRuleFieldChange(
-                              key,
-                              'distinct_ports_threshold',
-                              Number(e.target.value)
-                            )
+                            handleRuleFieldChange(key, 'distinct_ports_threshold', Number(e.target.value))
                           }
                           className="ns-input w-full !py-1.5 text-xs font-mono"
                         />
@@ -410,7 +420,7 @@ export default function SecurityCenterPage() {
 
                     {rule.attempts_threshold !== undefined && (
                       <div>
-                        <label className="block text-[11px] text-slate-400 mb-1">
+                        <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                           Attempts Threshold
                         </label>
                         <input
@@ -427,7 +437,7 @@ export default function SecurityCenterPage() {
 
                     {rule.threshold_kbps !== undefined && (
                       <div>
-                        <label className="block text-[11px] text-slate-400 mb-1">
+                        <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                           Traffic Spike Threshold (KB/s)
                         </label>
                         <input
@@ -444,7 +454,7 @@ export default function SecurityCenterPage() {
 
                     {rule.icmp_threshold !== undefined && (
                       <div>
-                        <label className="block text-[11px] text-slate-400 mb-1">
+                        <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                           ICMP Packets Threshold
                         </label>
                         <input
@@ -461,7 +471,7 @@ export default function SecurityCenterPage() {
 
                     {rule.time_window_seconds !== undefined && (
                       <div>
-                        <label className="block text-[11px] text-slate-400 mb-1">
+                        <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                           Time Window (seconds)
                         </label>
                         <input
@@ -469,11 +479,7 @@ export default function SecurityCenterPage() {
                           min="5"
                           value={rule.time_window_seconds}
                           onChange={(e) =>
-                            handleRuleFieldChange(
-                              key,
-                              'time_window_seconds',
-                              Number(e.target.value)
-                            )
+                            handleRuleFieldChange(key, 'time_window_seconds', Number(e.target.value))
                           }
                           className="ns-input w-full !py-1.5 text-xs font-mono"
                         />
@@ -489,72 +495,80 @@ export default function SecurityCenterPage() {
 
       {/* Alert Details Modal */}
       {selectedAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="ns-card w-full max-w-lg p-5 border-slate-700 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="ns-card w-full max-w-lg p-5 shadow-2xl space-y-4">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-xs text-slate-400">
+                  <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                     {selectedAlert.alert_code}
                   </span>
                   <StatusBadge label={selectedAlert.severity} variant={selectedAlert.severity} />
                   <StatusBadge label={selectedAlert.status} variant={selectedAlert.status} />
                 </div>
-                <h3 className="text-base font-semibold text-slate-100 mt-2">
+                <h3 className="text-base font-bold text-[#1a3342] dark:text-slate-100 mt-2">
                   {selectedAlert.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedAlert(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-              <div className="p-2.5 rounded-lg bg-navy-900 border border-slate-800">
+              <div className="p-2.5 rounded-xl bg-[#f4f9fc] dark:bg-navy-900 border border-[#d6e6ef] dark:border-slate-800">
                 <div className="text-[10px] text-slate-500 uppercase">Source IP</div>
-                <div className="text-sky-300 mt-1">{selectedAlert.src_ip || 'N/A'}</div>
+                <div className="text-[#244a5c] dark:text-sky-300 font-semibold mt-1">
+                  {selectedAlert.src_ip || 'N/A'}
+                </div>
               </div>
-              <div className="p-2.5 rounded-lg bg-navy-900 border border-slate-800">
+              <div className="p-2.5 rounded-xl bg-[#f4f9fc] dark:bg-navy-900 border border-[#d6e6ef] dark:border-slate-800">
                 <div className="text-[10px] text-slate-500 uppercase">Destination IP</div>
-                <div className="text-slate-200 mt-1">{selectedAlert.dst_ip || 'N/A'}</div>
+                <div className="text-slate-700 dark:text-slate-200 font-semibold mt-1">
+                  {selectedAlert.dst_ip || 'N/A'}
+                </div>
               </div>
             </div>
 
-            <div className="text-xs space-y-2">
+            <div className="text-xs space-y-2.5">
               <div>
-                <span className="text-slate-400 font-semibold">Detected At: </span>
-                <span className="font-mono text-slate-200">
+                <span className="text-slate-500 font-semibold">Detected At: </span>
+                <span className="font-mono text-slate-700 dark:text-slate-200">
                   {formatDateTime(selectedAlert.detected_at)}
                 </span>
               </div>
               <div>
-                <div className="text-slate-400 font-semibold mb-1">Reason for Detection</div>
-                <p className="text-slate-200 leading-relaxed">{selectedAlert.reason}</p>
+                <div className="text-slate-500 font-semibold mb-1">Reason for Detection</div>
+                <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
+                  {selectedAlert.reason}
+                </p>
               </div>
               <div>
-                <div className="text-slate-400 font-semibold mb-1">Recommended Action</div>
-                <p className="text-sky-200 leading-relaxed">{selectedAlert.recommended_action}</p>
+                <div className="text-slate-500 font-semibold mb-1">Recommended Action</div>
+                <p className="text-[#244a5c] dark:text-sky-200 leading-relaxed">
+                  {selectedAlert.recommended_action}
+                </p>
               </div>
               {selectedAlert.details && Object.keys(selectedAlert.details).length > 0 && (
                 <div>
-                  <div className="text-slate-400 font-semibold mb-1">Observed Evidence Metadata</div>
-                  <pre className="p-3 rounded-lg bg-navy-950 border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto">
+                  <div className="text-slate-500 font-semibold mb-1">Observed Evidence Metadata</div>
+                  <pre className="p-3 rounded-xl bg-[#f4f9fc] dark:bg-navy-950 border border-[#d6e6ef] dark:border-slate-800 text-[11px] font-mono text-slate-700 dark:text-slate-300 overflow-x-auto">
                     {JSON.stringify(selectedAlert.details, null, 2)}
                   </pre>
                 </div>
               )}
             </div>
 
-            <div className="pt-2 border-t border-slate-800 flex justify-end gap-2">
+            <div className="pt-2 border-t border-[#e4eff5] dark:border-slate-800 flex justify-end gap-2">
               {selectedAlert.status === 'open' && (
                 <button
                   type="button"
                   onClick={() => handleUpdateAlert(selectedAlert.id, 'acknowledged')}
-                  className="ns-btn-secondary !text-xs text-amber-300"
+                  className="ns-btn-secondary !text-xs"
                 >
                   Acknowledge
                 </button>
@@ -582,4 +596,3 @@ export default function SecurityCenterPage() {
     </div>
   );
 }
-

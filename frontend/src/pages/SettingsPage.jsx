@@ -11,7 +11,6 @@ import {
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import ErrorBanner from '../components/ErrorBanner';
-import StatusBadge from '../components/StatusBadge';
 import { api } from '../services/api';
 import { formatDateTime } from '../utils/formatters';
 
@@ -21,7 +20,6 @@ export default function SettingsPage() {
   const [trustedDevices, setTrustedDevices] = useState([]);
   const [targetsText, setTargetsText] = useState('');
 
-  // Manual trusted device form
   const [newTrustIp, setNewTrustIp] = useState('');
   const [newTrustMac, setNewTrustMac] = useState('');
   const [newTrustDesc, setNewTrustDesc] = useState('');
@@ -31,7 +29,6 @@ export default function SettingsPage() {
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
-  // Confirm Dialog state
   const [confirmState, setConfirmState] = useState({
     open: false,
     title: '',
@@ -181,40 +178,38 @@ export default function SettingsPage() {
   };
 
   if (loading && !settings) {
-    return <div className="ns-card p-8 text-sm text-slate-400">Loading settings...</div>;
+    return <div className="ns-card p-8 text-sm text-slate-500">Loading settings...</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-100">Settings</h1>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <h1 className="ns-page-title">Settings</h1>
+        <p className="ns-page-subtitle">
           Configure monitoring interfaces, capture limits, alert thresholds, trusted devices, and database retention.
         </p>
       </div>
 
-      <ErrorBanner message={error} onRetry={loadAll} />
+      <ErrorBanner message={error} onRetry={loadAll} onDismiss={() => setError(null)} />
 
       {feedback && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-200 flex items-center justify-between">
+        <div className="rounded-2xl border border-[#b7e4cd] dark:border-emerald-500/30 bg-[#e8f8f0] dark:bg-emerald-500/10 px-4 py-2.5 text-xs text-[#176442] dark:text-emerald-200 flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             {feedback}
           </span>
-          <button type="button" onClick={() => setFeedback(null)} className="text-emerald-300">
+          <button type="button" onClick={() => setFeedback(null)}>
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {settings && (
-        <form onSubmit={handleSaveSettings} className="space-y-6">
+        <form onSubmit={handleSaveSettings} className="space-y-5">
           {/* Core Monitoring Settings */}
           <div className="ns-card p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-sm font-semibold text-slate-100">
-                Monitoring &amp; Capture Configuration
-              </h2>
+            <div className="flex items-center justify-between border-b border-[#e4eff5] dark:border-slate-800 pb-3">
+              <h2 className="ns-section-title">Monitoring &amp; Capture Configuration</h2>
               <button type="submit" disabled={saving} className="ns-btn-primary !py-1.5 !text-xs">
                 <Save className="w-3.5 h-3.5" />
                 {saving ? 'Saving...' : 'Save Settings'}
@@ -223,14 +218,12 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   Default Network Interface
                 </label>
                 <select
                   value={settings.default_interface || ''}
-                  onChange={(e) =>
-                    setSettings({ ...settings, default_interface: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, default_interface: e.target.value })}
                   className="ns-input w-full"
                 >
                   <option value="">Auto-detect best active interface</option>
@@ -243,7 +236,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   Packet Capture Session Limit (100–50,000)
                 </label>
                 <input
@@ -251,15 +244,13 @@ export default function SettingsPage() {
                   min="100"
                   max="50000"
                   value={settings.packet_capture_limit}
-                  onChange={(e) =>
-                    setSettings({ ...settings, packet_capture_limit: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, packet_capture_limit: e.target.value })}
                   className="ns-input w-full font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   SQLite Packet Retention Limit (500–100,000)
                 </label>
                 <input
@@ -275,7 +266,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   Monitoring Refresh Interval (ms)
                 </label>
                 <input
@@ -284,22 +275,18 @@ export default function SettingsPage() {
                   max="30000"
                   step="500"
                   value={settings.refresh_interval_ms}
-                  onChange={(e) =>
-                    setSettings({ ...settings, refresh_interval_ms: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, refresh_interval_ms: e.target.value })}
                   className="ns-input w-full font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   Minimum Alert Notification Severity
                 </label>
                 <select
                   value={settings.alert_min_severity || 'Low'}
-                  onChange={(e) =>
-                    setSettings({ ...settings, alert_min_severity: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, alert_min_severity: e.target.value })}
                   className="ns-input w-full"
                 >
                   <option value="Low">Low and above</option>
@@ -310,7 +297,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                   Connectivity Check Targets (comma-separated)
                 </label>
                 <input
@@ -322,35 +309,30 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800">
-              <label className="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer">
+            <div className="pt-3 flex flex-wrap items-center justify-between gap-4 border-t border-[#e4eff5] dark:border-slate-800">
+              <label className="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={Boolean(settings.alert_notifications_enabled)}
                   onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      alert_notifications_enabled: e.target.checked,
-                    })
+                    setSettings({ ...settings, alert_notifications_enabled: e.target.checked })
                   }
-                  className="rounded border-slate-600 bg-navy-900 text-sky-500"
+                  className="rounded border-slate-400 text-[#244a5c]"
                 />
                 Enable real-time security alert notifications in the top bar
               </label>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                  <FlaskConical className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                  <FlaskConical className="w-3.5 h-3.5 text-[#c95944]" />
                   Academic Demo Mode:
                 </span>
                 <button
                   type="button"
                   onClick={handleToggleDemo}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    settings.demo_mode
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                      : 'bg-slate-800 text-slate-300 border-slate-700'
-                  }`}
+                  className={
+                    settings.demo_mode ? 'ns-btn-danger !py-1.5 !text-xs' : 'ns-btn-secondary !py-1.5 !text-xs'
+                  }
                 >
                   {settings.demo_mode ? 'Enabled (Click to Disable)' : 'Disabled (Click to Enable)'}
                 </button>
@@ -361,13 +343,11 @@ export default function SettingsPage() {
           {/* Security Thresholds Quick Summary */}
           {settings.security_rules && (
             <div className="ns-card p-5 space-y-4">
-              <h2 className="text-sm font-semibold text-slate-100">
-                Security Detection Thresholds
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800 space-y-2">
-                  <div className="font-medium text-slate-200">Port Scan Indicator</div>
-                  <label className="block text-slate-400">
+              <h2 className="ns-section-title">Security Detection Thresholds</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="ns-subcard p-3.5 space-y-2">
+                  <div className="font-bold text-[#1a3342] dark:text-slate-200">Port Scan Indicator</div>
+                  <label className="block text-slate-500 dark:text-slate-400">
                     Distinct Ports Threshold
                     <input
                       type="number"
@@ -390,9 +370,9 @@ export default function SettingsPage() {
                   </label>
                 </div>
 
-                <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800 space-y-2">
-                  <div className="font-medium text-slate-200">Repeated Connections</div>
-                  <label className="block text-slate-400">
+                <div className="ns-subcard p-3.5 space-y-2">
+                  <div className="font-bold text-[#1a3342] dark:text-slate-200">Repeated Connections</div>
+                  <label className="block text-slate-500 dark:text-slate-400">
                     Attempts Threshold (per window)
                     <input
                       type="number"
@@ -415,9 +395,9 @@ export default function SettingsPage() {
                   </label>
                 </div>
 
-                <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800 space-y-2">
-                  <div className="font-medium text-slate-200">Traffic Spike Baseline</div>
-                  <label className="block text-slate-400">
+                <div className="ns-subcard p-3.5 space-y-2">
+                  <div className="font-bold text-[#1a3342] dark:text-slate-200">Traffic Spike Baseline</div>
+                  <label className="block text-slate-500 dark:text-slate-400">
                     Throughput Threshold (KB/s)
                     <input
                       type="number"
@@ -448,15 +428,17 @@ export default function SettingsPage() {
       {/* Trusted Device Management */}
       <div className="ns-card p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-sky-400" />
-          <h2 className="text-sm font-semibold text-slate-100">
+          <ShieldCheck className="w-4 h-4 text-[#244a5c] dark:text-sky-400" />
+          <h2 className="ns-section-title">
             Approved Trusted Devices Registry ({trustedDevices.length})
           </h2>
         </div>
 
         <form onSubmit={handleAddTrusted} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">IP Address *</label>
+            <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              IP Address *
+            </label>
             <input
               type="text"
               required
@@ -467,7 +449,9 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">MAC Address (optional)</label>
+            <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              MAC Address (optional)
+            </label>
             <input
               type="text"
               value={newTrustMac}
@@ -477,7 +461,9 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">Description</label>
+            <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              Description
+            </label>
             <input
               type="text"
               value={newTrustDesc}
@@ -486,7 +472,7 @@ export default function SettingsPage() {
               className="ns-input w-full !py-1.5 text-xs"
             />
           </div>
-          <button type="submit" className="ns-btn-secondary !py-1.5 !text-xs">
+          <button type="submit" className="ns-btn-primary !py-1.5 !text-xs">
             <Plus className="w-3.5 h-3.5" />
             Add Trusted Device
           </button>
@@ -504,7 +490,11 @@ export default function SettingsPage() {
               key: 'added_at',
               label: 'Added At',
               mono: true,
-              render: (r) => <span className="text-slate-400">{formatDateTime(r.added_at)}</span>,
+              render: (r) => (
+                <span className="text-slate-500 dark:text-slate-400">
+                  {formatDateTime(r.added_at)}
+                </span>
+              ),
             },
             {
               key: 'actions',
@@ -514,7 +504,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => requestRemoveTrusted(r)}
-                  className="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[#c95944] hover:underline"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Remove
@@ -527,11 +517,13 @@ export default function SettingsPage() {
         />
       </div>
 
-      {/* Clear Historical Records (with Confirmation Dialogs) */}
-      <div className="ns-card p-5 border-red-500/20 space-y-4">
+      {/* Clear Historical Records */}
+      <div className="ns-card p-5 border-[#e7bfb0] dark:border-red-500/20 space-y-4">
         <div>
-          <h2 className="text-sm font-semibold text-red-300">Database Maintenance &amp; Cleanup</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h2 className="text-sm font-bold text-[#a53524] dark:text-red-300">
+            Database Maintenance &amp; Cleanup
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Permanently remove historical records from local SQLite storage. Trusted devices and
             settings are preserved.
           </p>
@@ -553,7 +545,7 @@ export default function SettingsPage() {
               className={
                 item.scope === 'all'
                   ? 'ns-btn-danger !py-1.5 !text-xs'
-                  : 'ns-btn-secondary !py-1.5 !text-xs text-red-300 border-red-500/30 hover:bg-red-500/10'
+                  : 'ns-btn-secondary !py-1.5 !text-xs !bg-[#fdf3f0] !text-[#a53524] !border-[#eabbb0] hover:!bg-[#f8dfd7] dark:!bg-red-500/10 dark:!text-red-300 dark:!border-red-500/30'
               }
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -576,4 +568,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

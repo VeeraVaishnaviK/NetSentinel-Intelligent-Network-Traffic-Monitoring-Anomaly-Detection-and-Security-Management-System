@@ -4,7 +4,13 @@
 
 @layer base {
   body {
-    background-color: #080d18;
+    background-color: #dcebf2;
+    color: #1e293b;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark body {
+    background-color: #0b141c;
     color: #e2e8f0;
   }
 
@@ -14,38 +20,105 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #0c1322;
+    background: #d3e4ee;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: #101d28;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 4px;
+    background: #9bb8c9;
+    border-radius: 999px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #284154;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #7298ae;
   }
 }
 
 @layer components {
   .ns-card {
-    @apply bg-navy-800/90 border border-slate-800/90 rounded-xl;
+    @apply bg-white dark:bg-navy-850 border border-[#cde0ea] dark:border-slate-800 rounded-2xl shadow-card transition-colors;
+  }
+
+  .ns-subcard {
+    @apply bg-[#f4f9fc] dark:bg-navy-900/80 border border-[#d6e6ef] dark:border-slate-800 rounded-xl transition-colors;
   }
 
   .ns-input {
-    @apply bg-navy-900 border border-slate-700/80 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/40 transition-colors;
+    @apply bg-[#f4f9fc] dark:bg-navy-900 border border-[#c6dce8] dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#244a5c] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#244a5c]/15 transition-colors;
   }
 
   .ns-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-sky-600 hover:bg-sky-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#244a5c] hover:bg-[#1b3847] dark:bg-sky-600 dark:hover:bg-sky-500 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
   .ns-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-[#eef6fa] hover:bg-[#dfeef6] dark:bg-navy-800 dark:hover:bg-navy-700 text-[#1f4152] dark:text-slate-200 border border-[#c7dce8] dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
   .ns-btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium bg-red-600/90 hover:bg-red-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-[#c95944] hover:bg-[#b24936] text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .ns-page-title {
+    @apply text-xl font-bold text-[#1a3342] dark:text-slate-100 tracking-tight;
+  }
+
+  .ns-page-subtitle {
+    @apply text-xs text-slate-500 dark:text-slate-400 mt-0.5;
+  }
+
+  .ns-section-title {
+    @apply text-sm font-semibold text-[#1a3342] dark:text-slate-100;
   }
 }
 
+/* Signature curved active sidebar tab merging seamlessly into canvas */
+.sidebar-active-tab {
+  position: relative;
+  background-color: #dcebf2;
+  color: #1f4152;
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+}
+
+.dark .sidebar-active-tab {
+  background-color: #0b141c;
+  color: #7dd3fc;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-active-tab::before,
+  .sidebar-active-tab::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
+  .sidebar-active-tab::before {
+    top: -16px;
+    background: radial-gradient(circle at 0 0, transparent 16px, #dcebf2 16.5px);
+  }
+
+  .sidebar-active-tab::after {
+    bottom: -16px;
+    background: radial-gradient(circle at 0 100%, transparent 16px, #dcebf2 16.5px);
+  }
+
+  .dark .sidebar-active-tab::before {
+    background: radial-gradient(circle at 0 0, transparent 16px, #0b141c 16.5px);
+  }
+
+  .dark .sidebar-active-tab::after {
+    background: radial-gradient(circle at 0 100%, transparent 16px, #0b141c 16.5px);
+  }
+}

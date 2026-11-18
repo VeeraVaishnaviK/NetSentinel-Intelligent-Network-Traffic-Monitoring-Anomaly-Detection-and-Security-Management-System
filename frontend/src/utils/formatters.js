@@ -40,17 +40,17 @@ export function formatDateTime(isoString) {
   });
 }
 
+// Harmonious slate-teal / powder-blue / sage / terracotta palette matching the reference UI
 export const PROTOCOL_COLORS = {
-  TCP: '#38bdf8',
-  UDP: '#6366f1',
-  DNS: '#10b981',
-  HTTP: '#f59e0b',
-  ICMP: '#f43f5e',
-  ARP: '#a855f7',
-  OTHER: '#64748b',
+  TCP: '#486d7e',
+  UDP: '#a9c2d1',
+  DNS: '#3c9a7c',
+  HTTP: '#d98a6c',
+  ICMP: '#c95944',
+  ARP: '#6d8fa1',
+  OTHER: '#94a3b8',
 };
 
 export function getProtocolColor(proto) {
-  return PROTOCOL_COLORS[(proto || 'OTHER').toUpperCase()] || '#64748b';
+  return PROTOCOL_COLORS[(proto || 'OTHER').toUpperCase()] || '#94a3b8';
 }
-

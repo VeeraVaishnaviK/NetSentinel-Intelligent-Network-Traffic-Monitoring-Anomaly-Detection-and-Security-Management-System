@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Activity,
-  Globe,
-  Loader2,
-  Play,
-  Route,
-  Terminal,
-  Wifi,
-} from 'lucide-react';
+import { Activity, Globe, Loader2, Play, Route, Terminal, Wifi } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import ErrorBanner from '../components/ErrorBanner';
 import StatusBadge from '../components/StatusBadge';
@@ -72,10 +64,10 @@ export default function DiagnosticsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-100">Network Diagnostics</h1>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <h1 className="ns-page-title">Network Diagnostics</h1>
+        <p className="ns-page-subtitle">
           Safe interactive troubleshooting utilities using subprocess argument arrays and Python sockets.
         </p>
       </div>
@@ -90,34 +82,34 @@ export default function DiagnosticsPage() {
               setActiveTool(key);
               setError(null);
             }}
-            className={`ns-card p-3.5 flex items-center gap-3 text-left transition-colors ${
+            className={`ns-card p-3.5 flex items-center gap-3 text-left transition-all ${
               activeTool === key
-                ? 'border-sky-500/60 bg-sky-500/10 text-sky-200'
-                : 'text-slate-300 hover:border-slate-700'
+                ? '!border-[#244a5c] dark:!border-sky-500 ring-2 ring-[#244a5c]/15 bg-white dark:bg-navy-800'
+                : 'hover:shadow-card-hover'
             }`}
           >
             <div
-              className={`p-2 rounded-lg border ${
+              className={`p-2.5 rounded-xl border ${
                 activeTool === key
-                  ? 'bg-sky-500/20 border-sky-500/40 text-sky-300'
-                  : 'bg-slate-800 border-slate-700 text-slate-400'
+                  ? 'bg-[#244a5c] dark:bg-sky-600 border-[#244a5c] text-white'
+                  : 'bg-[#eef6fa] dark:bg-navy-900 border-[#cde0ea] dark:border-slate-700 text-[#244a5c] dark:text-slate-300'
               }`}
             >
               <Icon className="w-4 h-4" />
             </div>
-            <span className="text-sm font-medium">{label}</span>
+            <span className="text-sm font-semibold text-[#1a3342] dark:text-slate-100">{label}</span>
           </button>
         ))}
       </div>
 
-      <ErrorBanner message={error} />
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
       {/* Tool Input Form */}
       <form onSubmit={runTool} className="ns-card p-5 space-y-4">
         {activeTool === 'ping' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Target Hostname or IP Address
               </label>
               <input
@@ -130,7 +122,7 @@ export default function DiagnosticsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Echo Count (1–8)
               </label>
               <input
@@ -152,7 +144,7 @@ export default function DiagnosticsPage() {
         {activeTool === 'traceroute' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Destination IP or Hostname
               </label>
               <input
@@ -165,7 +157,7 @@ export default function DiagnosticsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Max Hops (1–25)
               </label>
               <input
@@ -187,7 +179,7 @@ export default function DiagnosticsPage() {
         {activeTool === 'dns' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="md:col-span-3">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Domain Name
               </label>
               <input
@@ -209,7 +201,7 @@ export default function DiagnosticsPage() {
         {activeTool === 'connectivity' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="md:col-span-3">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Connectivity Targets (comma-separated)
               </label>
               <input
@@ -231,25 +223,24 @@ export default function DiagnosticsPage() {
       {/* Latest Result Output */}
       {latestResult && (
         <div className="ns-card p-5 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#e4eff5] dark:border-slate-800">
             <div className="flex items-center gap-2.5">
-              <Terminal className="w-4 h-4 text-sky-400" />
-              <h3 className="text-sm font-semibold text-slate-100 uppercase">
+              <Terminal className="w-4 h-4 text-[#244a5c] dark:text-sky-400" />
+              <h3 className="text-sm font-bold text-[#1a3342] dark:text-slate-100 uppercase">
                 {latestResult.test_type} Result — {latestResult.target}
               </h3>
               <StatusBadge label={latestResult.status} variant={latestResult.status} dot />
             </div>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
               {formatDateTime(latestResult.executed_at)}
             </span>
           </div>
 
-          {/* Ping Visual Summary */}
           {latestResult.test_type === 'ping' && latestResult.result && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                  <div className="text-slate-400">Reachability</div>
+                <div className="ns-subcard p-3">
+                  <div className="text-slate-500">Reachability</div>
                   <div className="mt-1.5">
                     <StatusBadge
                       label={latestResult.result.reachable ? 'Reachable' : 'Unreachable'}
@@ -258,36 +249,35 @@ export default function DiagnosticsPage() {
                     />
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                  <div className="text-slate-400">Avg Response Time</div>
-                  <div className="mt-1 font-mono text-base font-semibold text-sky-300">
+                <div className="ns-subcard p-3">
+                  <div className="text-slate-500">Avg Response Time</div>
+                  <div className="mt-1 font-mono text-base font-bold text-[#244a5c] dark:text-sky-300">
                     {latestResult.result.avg_rtt_ms !== null
                       ? `${latestResult.result.avg_rtt_ms} ms`
                       : '—'}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                  <div className="text-slate-400">Packet Loss</div>
-                  <div className="mt-1 font-mono text-base font-semibold text-slate-100">
+                <div className="ns-subcard p-3">
+                  <div className="text-slate-500">Packet Loss</div>
+                  <div className="mt-1 font-mono text-base font-bold text-[#1a3342] dark:text-slate-100">
                     {latestResult.result.packet_loss_percent}%
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                  <div className="text-slate-400">Min / Max RTT</div>
-                  <div className="mt-1 font-mono text-sm text-slate-200">
+                <div className="ns-subcard p-3">
+                  <div className="text-slate-500">Min / Max RTT</div>
+                  <div className="mt-1 font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">
                     {latestResult.result.min_rtt_ms ?? '—'} / {latestResult.result.max_rtt_ms ?? '—'} ms
                   </div>
                 </div>
               </div>
               {latestResult.result.raw_output && (
-                <pre className="p-3.5 rounded-lg bg-navy-950 border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap">
+                <pre className="p-3.5 rounded-xl bg-[#182f3c] text-slate-100 text-xs font-mono overflow-x-auto whitespace-pre-wrap">
                   {latestResult.result.raw_output}
                 </pre>
               )}
             </div>
           )}
 
-          {/* Traceroute Visual Summary */}
           {latestResult.test_type === 'traceroute' && latestResult.result && (
             <div className="space-y-4">
               <DataTable
@@ -318,65 +308,63 @@ export default function DiagnosticsPage() {
                 emptyDescription="The destination or intermediate routers may block ICMP/traceroute probes."
               />
               {latestResult.result.raw_output && (
-                <pre className="p-3.5 rounded-lg bg-navy-950 border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap">
+                <pre className="p-3.5 rounded-xl bg-[#182f3c] text-slate-100 text-xs font-mono overflow-x-auto whitespace-pre-wrap">
                   {latestResult.result.raw_output}
                 </pre>
               )}
             </div>
           )}
 
-          {/* DNS Visual Summary */}
           {latestResult.test_type === 'dns' && latestResult.result && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800">
-                <div className="text-slate-400">Resolution Status</div>
+              <div className="ns-subcard p-3.5">
+                <div className="text-slate-500">Resolution Status</div>
                 <div className="mt-1.5 flex items-center gap-2">
                   <StatusBadge
                     label={latestResult.result.resolved ? 'Resolved' : 'Failed'}
                     variant={latestResult.result.resolved ? 'success' : 'failed'}
                   />
-                  <span className="font-mono text-slate-400">
+                  <span className="font-mono text-slate-500">
                     {latestResult.result.resolution_time_ms} ms
                   </span>
                 </div>
                 {latestResult.result.canonical_name && (
-                  <div className="mt-2 font-mono text-slate-300">
+                  <div className="mt-2 font-mono text-slate-700 dark:text-slate-300">
                     CNAME: {latestResult.result.canonical_name}
                   </div>
                 )}
               </div>
-              <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800">
-                <div className="text-slate-400 mb-1.5">IPv4 Addresses (A Records)</div>
+              <div className="ns-subcard p-3.5">
+                <div className="text-slate-500 mb-1.5">IPv4 Addresses (A Records)</div>
                 {(latestResult.result.ipv4_addresses || []).length > 0 ? (
-                  <ul className="space-y-1 font-mono text-sky-300">
+                  <ul className="space-y-1 font-mono font-semibold text-[#244a5c] dark:text-sky-300">
                     {latestResult.result.ipv4_addresses.map((ip) => (
                       <li key={ip}>{ip}</li>
                     ))}
                   </ul>
                 ) : (
-                  <span className="text-slate-500">None</span>
+                  <span className="text-slate-400">None</span>
                 )}
               </div>
-              <div className="p-3.5 rounded-lg bg-navy-900 border border-slate-800">
-                <div className="text-slate-400 mb-1.5">IPv6 Addresses (AAAA Records)</div>
+              <div className="ns-subcard p-3.5">
+                <div className="text-slate-500 mb-1.5">IPv6 Addresses (AAAA Records)</div>
                 {(latestResult.result.ipv6_addresses || []).length > 0 ? (
-                  <ul className="space-y-1 font-mono text-slate-300 break-all">
+                  <ul className="space-y-1 font-mono text-slate-700 dark:text-slate-300 break-all">
                     {latestResult.result.ipv6_addresses.map((ip) => (
                       <li key={ip}>{ip}</li>
                     ))}
                   </ul>
                 ) : (
-                  <span className="text-slate-500">None</span>
+                  <span className="text-slate-400">None</span>
                 )}
               </div>
             </div>
           )}
 
-          {/* Connectivity Test Visual Summary */}
           {latestResult.test_type === 'connectivity' && latestResult.result && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">Overall Internet Status:</span>
+                <span className="text-xs text-slate-500">Overall Internet Status:</span>
                 <StatusBadge
                   label={latestResult.result.overall_status?.toUpperCase()}
                   variant={latestResult.result.overall_status}
@@ -416,10 +404,8 @@ export default function DiagnosticsPage() {
 
       {/* Diagnostics History Table */}
       <div className="ns-card overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-800">
-          <h3 className="text-sm font-semibold text-slate-100">
-            Diagnostics Execution History ({history.length})
-          </h3>
+        <div className="px-5 py-3.5 border-b border-[#e4eff5] dark:border-slate-800">
+          <h3 className="ns-section-title">Diagnostics Execution History ({history.length})</h3>
         </div>
         <DataTable
           compact
@@ -432,7 +418,9 @@ export default function DiagnosticsPage() {
               key: 'test_type',
               label: 'Utility',
               render: (r) => (
-                <span className="uppercase text-xs font-semibold text-sky-300">{r.test_type}</span>
+                <span className="uppercase text-xs font-bold text-[#244a5c] dark:text-sky-300">
+                  {r.test_type}
+                </span>
               ),
             },
             { key: 'target', label: 'Target', mono: true },
@@ -446,7 +434,11 @@ export default function DiagnosticsPage() {
               key: 'executed_at',
               label: 'Executed At',
               mono: true,
-              render: (r) => <span className="text-slate-400">{formatDateTime(r.executed_at)}</span>,
+              render: (r) => (
+                <span className="text-slate-500 dark:text-slate-400">
+                  {formatDateTime(r.executed_at)}
+                </span>
+              ),
             },
           ]}
           emptyIcon={Terminal}
@@ -457,4 +449,3 @@ export default function DiagnosticsPage() {
     </div>
   );
 }
-

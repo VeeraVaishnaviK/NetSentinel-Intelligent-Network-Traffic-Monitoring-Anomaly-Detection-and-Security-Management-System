@@ -29,7 +29,6 @@ export default function DiscoveryPage() {
   const [actionSuccess, setActionSuccess] = useState(null);
   const [starting, setStarting] = useState(false);
 
-  // Trust modal state
   const [trustModalDevice, setTrustModalDevice] = useState(null);
   const [trustDescription, setTrustDescription] = useState('');
   const [trustBusy, setTrustBusy] = useState(false);
@@ -65,9 +64,7 @@ export default function DiscoveryPage() {
   const handleInterfaceChange = (name) => {
     setSelectedIface(name);
     const found = interfaces.find((i) => i.name === name);
-    if (found?.subnet) {
-      setSubnet(found.subnet);
-    }
+    if (found?.subnet) setSubnet(found.subnet);
   };
 
   const handleStartScan = async () => {
@@ -149,7 +146,9 @@ export default function DiscoveryPage() {
       mono: true,
       render: (row) => (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-sky-300 font-medium">{row.ip_address}</span>
+          <span className="font-mono text-[#244a5c] dark:text-sky-300 font-semibold">
+            {row.ip_address}
+          </span>
           {row.is_new && <StatusBadge label="NEW" variant="new" />}
           {row.is_demo && <StatusBadge label="DEMO" variant="demo" />}
         </div>
@@ -160,7 +159,9 @@ export default function DiscoveryPage() {
       label: 'MAC Address',
       mono: true,
       render: (row) => (
-        <span className="font-mono text-xs text-slate-300">{row.mac_address || 'Unavailable'}</span>
+        <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
+          {row.mac_address || 'Unavailable'}
+        </span>
       ),
     },
     {
@@ -168,9 +169,11 @@ export default function DiscoveryPage() {
       label: 'Hostname',
       render: (row) => (
         <div>
-          <div className="text-sm text-slate-200">{row.hostname || 'Unknown'}</div>
+          <div className="text-sm font-medium text-[#1a3342] dark:text-slate-200">
+            {row.hostname || 'Unknown'}
+          </div>
           {row.description && (
-            <div className="text-[11px] text-slate-400">{row.description}</div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">{row.description}</div>
           )}
         </div>
       ),
@@ -195,7 +198,7 @@ export default function DiscoveryPage() {
       label: 'Observed Traffic',
       mono: true,
       render: (row) => (
-        <span className="text-xs text-slate-300">
+        <span className="text-xs text-slate-600 dark:text-slate-300">
           {formatBytes(row.total_bytes)} ({formatNumber(row.packet_count)} pkts)
         </span>
       ),
@@ -204,13 +207,21 @@ export default function DiscoveryPage() {
       key: 'first_discovered',
       label: 'First Discovered',
       mono: true,
-      render: (row) => <span className="text-xs text-slate-400">{formatDateTime(row.first_discovered)}</span>,
+      render: (row) => (
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          {formatDateTime(row.first_discovered)}
+        </span>
+      ),
     },
     {
       key: 'last_seen',
       label: 'Last Seen',
       mono: true,
-      render: (row) => <span className="text-xs text-slate-300">{formatDateTime(row.last_seen)}</span>,
+      render: (row) => (
+        <span className="text-xs text-slate-600 dark:text-slate-300">
+          {formatDateTime(row.last_seen)}
+        </span>
+      ),
     },
     {
       key: 'actions',
@@ -222,7 +233,7 @@ export default function DiscoveryPage() {
             <button
               type="button"
               onClick={() => handleUntrust(row)}
-              className="ns-btn-secondary !py-1 !px-2.5 !text-xs text-amber-300 border-amber-500/30 hover:bg-amber-500/10"
+              className="ns-btn-secondary !py-1 !px-2.5 !text-xs !bg-[#fef0dc] !text-[#9a5514] !border-[#f3d4aa] dark:!bg-amber-500/15 dark:!text-amber-300"
             >
               <ShieldOff className="w-3.5 h-3.5" />
               Untrust
@@ -234,7 +245,7 @@ export default function DiscoveryPage() {
                 setTrustModalDevice(row);
                 setTrustDescription(row.description || '');
               }}
-              className="ns-btn-secondary !py-1 !px-2.5 !text-xs text-sky-300 border-sky-500/30 hover:bg-sky-500/10"
+              className="ns-btn-secondary !py-1 !px-2.5 !text-xs"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               Trust
@@ -246,45 +257,40 @@ export default function DiscoveryPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">
-            Network Discovery &amp; Device Management
-          </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h1 className="ns-page-title">Network Discovery &amp; Device Management</h1>
+          <p className="ns-page-subtitle">
             Discover hosts on your authorized local subnet via ARP scanning and manage trusted devices.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={refreshDevices}
-            className="ns-btn-secondary !py-1.5 !text-xs"
-          >
+          <button type="button" onClick={refreshDevices} className="ns-btn-secondary !py-1.5 !text-xs">
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
-          <a
-            href={api.getCsvExportUrl('', '', 'devices')}
-            className="ns-btn-secondary !py-1.5 !text-xs"
-          >
+          <a href={api.getCsvExportUrl('', '', 'devices')} className="ns-btn-primary !py-1.5 !text-xs">
             <Download className="w-3.5 h-3.5" />
             Export CSV
           </a>
         </div>
       </div>
 
-      <ErrorBanner message={error || actionError} onRetry={refreshDevices} />
+      <ErrorBanner
+        message={error || actionError}
+        onRetry={refreshDevices}
+        onDismiss={() => setActionError(null)}
+      />
 
       {actionSuccess && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-200 flex items-center justify-between">
+        <div className="rounded-2xl border border-[#b7e4cd] dark:border-emerald-500/30 bg-[#e8f8f0] dark:bg-emerald-500/10 px-4 py-2.5 text-xs text-[#176442] dark:text-emerald-200 flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             {actionSuccess}
           </span>
-          <button type="button" onClick={() => setActionSuccess(null)} className="text-emerald-300 hover:text-white">
+          <button type="button" onClick={() => setActionSuccess(null)}>
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -297,7 +303,7 @@ export default function DiscoveryPage() {
           value={formatNumber(devices.length)}
           subtext={`${devicesData?.online || 0} currently online`}
           icon={Laptop}
-          accent="sky"
+          accent="mint"
           mono
         />
         <StatCard
@@ -305,7 +311,7 @@ export default function DiscoveryPage() {
           value={formatNumber(devicesData?.new_count || 0)}
           subtext="Compared with previous scan"
           icon={Radar}
-          accent="blue"
+          accent="sky"
           mono
         />
         <StatCard
@@ -321,7 +327,8 @@ export default function DiscoveryPage() {
           value={formatNumber(unapprovedCount)}
           subtext="Flagged for admin review"
           icon={ShieldOff}
-          accent={unapprovedCount > 0 ? 'amber' : 'slate'}
+          accent={unapprovedCount > 0 ? 'peach' : 'slate'}
+          variant={unapprovedCount > 0 ? 'alert' : 'default'}
           mono
         />
       </div>
@@ -329,7 +336,7 @@ export default function DiscoveryPage() {
       {/* Scan Control Card */}
       <div className="ns-card p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-100">Authorized Local ARP Scanner</h2>
+          <h2 className="ns-section-title">Authorized Local ARP Scanner</h2>
           {scanStatus.method && (
             <StatusBadge
               label={isScanning ? 'Scan Running' : scanStatus.method}
@@ -341,7 +348,7 @@ export default function DiscoveryPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
               Network Interface
             </label>
             <select
@@ -358,7 +365,7 @@ export default function DiscoveryPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
               Local Private Subnet (CIDR)
             </label>
             <input
@@ -392,12 +399,12 @@ export default function DiscoveryPage() {
           </div>
         </div>
 
-        <label className="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer select-none">
+        <label className="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={authorized}
             onChange={(e) => setAuthorized(e.target.checked)}
-            className="mt-0.5 rounded border-slate-600 bg-navy-900 text-sky-500 focus:ring-sky-500/40"
+            className="mt-0.5 rounded border-slate-400 text-[#244a5c] focus:ring-[#244a5c]"
           />
           <span>
             I confirm that I have explicit authorization to scan this private local network subnet.
@@ -407,12 +414,12 @@ export default function DiscoveryPage() {
 
         {scanStatus.message && (
           <div
-            className={`rounded-lg border px-3.5 py-2.5 text-xs flex items-start gap-2 ${
+            className={`rounded-xl border px-3.5 py-2.5 text-xs flex items-start gap-2 ${
               scanStatus.error
-                ? 'bg-red-500/10 border-red-500/30 text-red-200'
+                ? 'bg-[#fdf3f0] border-[#eabbb0] text-[#8a2e1d] dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-200'
                 : scanStatus.fallback_used
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-                : 'bg-sky-500/10 border-sky-500/30 text-sky-200'
+                ? 'bg-[#fef6ec] border-[#f3d4aa] text-[#8c4f12] dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-200'
+                : 'bg-[#eef6fa] border-[#c4dceb] text-[#1f4152] dark:bg-sky-500/10 dark:border-sky-500/30 dark:text-sky-200'
             }`}
           >
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
@@ -429,10 +436,10 @@ export default function DiscoveryPage() {
         )}
       </div>
 
-      {/* Detected Interfaces Reference Table */}
+      {/* Detected Interfaces Table */}
       <div className="ns-card overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-100">
+        <div className="px-5 py-3.5 border-b border-[#e4eff5] dark:border-slate-800">
+          <h3 className="ns-section-title">
             Detected Local Network Interfaces ({interfaces.length})
           </h3>
         </div>
@@ -455,7 +462,11 @@ export default function DiscoveryPage() {
               key: 'is_up',
               label: 'Link Status',
               render: (r) => (
-                <StatusBadge label={r.is_up ? 'UP' : 'DOWN'} variant={r.is_up ? 'online' : 'offline'} dot />
+                <StatusBadge
+                  label={r.is_up ? 'UP' : 'DOWN'}
+                  variant={r.is_up ? 'online' : 'offline'}
+                  dot
+                />
               ),
             },
           ]}
@@ -464,15 +475,11 @@ export default function DiscoveryPage() {
 
       {/* Discovered Devices Table */}
       <div className="ns-card overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-100">
-              Discovered Devices ({devices.length})
-            </h3>
-            <p className="text-xs text-slate-400">
-              NetSentinel tracks device trust passively without modifying OS firewall rules.
-            </p>
-          </div>
+        <div className="px-5 py-3.5 border-b border-[#e4eff5] dark:border-slate-800">
+          <h3 className="ns-section-title">Discovered Devices ({devices.length})</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            NetSentinel tracks device trust passively without modifying OS firewall rules.
+          </p>
         </div>
         {loading && devices.length === 0 ? (
           <TableSkeleton rows={5} />
@@ -490,34 +497,42 @@ export default function DiscoveryPage() {
 
       {/* Mark Trusted Modal */}
       {trustModalDevice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="ns-card w-full max-w-md p-5 border-slate-700 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="ns-card w-full max-w-md p-5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-100">Mark Device as Trusted</h3>
+              <h3 className="text-base font-bold text-[#1a3342] dark:text-slate-100">
+                Mark Device as Trusted
+              </h3>
               <button
                 type="button"
                 onClick={() => setTrustModalDevice(null)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="mt-3 rounded-lg bg-navy-900 border border-slate-800 p-3 text-xs font-mono space-y-1">
+            <div className="mt-3 rounded-xl bg-[#f4f9fc] dark:bg-navy-900 border border-[#d6e6ef] dark:border-slate-800 p-3 text-xs font-mono space-y-1">
               <div>
                 <span className="text-slate-500">IP: </span>
-                <span className="text-sky-300">{trustModalDevice.ip_address}</span>
+                <span className="text-[#244a5c] dark:text-sky-300 font-semibold">
+                  {trustModalDevice.ip_address}
+                </span>
               </div>
               <div>
                 <span className="text-slate-500">MAC: </span>
-                <span className="text-slate-300">{trustModalDevice.mac_address || 'Unavailable'}</span>
+                <span className="text-slate-700 dark:text-slate-300">
+                  {trustModalDevice.mac_address || 'Unavailable'}
+                </span>
               </div>
               <div>
                 <span className="text-slate-500">Host: </span>
-                <span className="text-slate-300">{trustModalDevice.hostname || 'Unknown'}</span>
+                <span className="text-slate-700 dark:text-slate-300">
+                  {trustModalDevice.hostname || 'Unknown'}
+                </span>
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
                 Device Description / Owner Note
               </label>
               <input
@@ -551,4 +566,3 @@ export default function DiscoveryPage() {
     </div>
   );
 }
-

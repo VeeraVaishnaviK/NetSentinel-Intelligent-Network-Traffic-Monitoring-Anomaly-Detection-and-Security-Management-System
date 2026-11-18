@@ -8,30 +8,32 @@ import {
   FlaskConical,
   LayoutDashboard,
   Menu,
+  Moon,
   Network,
   Radar,
+  Search,
   Settings,
   ShieldAlert,
+  ShieldCheck,
+  Sun,
   Terminal,
-  User,
   Wifi,
   X,
 } from 'lucide-react';
-import logoSvg from '../assets/logo.svg';
 import StatusBadge from '../components/StatusBadge';
 import { api } from '../services/api';
 import { usePolling } from '../hooks/usePolling';
 import { formatDateTime } from '../utils/formatters';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Overview', icon: LayoutDashboard, end: true },
-  { to: '/discovery', label: 'Network Discovery', icon: Radar },
-  { to: '/packets', label: 'Packet Analyzer', icon: Activity },
-  { to: '/traffic', label: 'Traffic Analytics', icon: BarChart3 },
-  { to: '/security', label: 'Security Center', icon: ShieldAlert },
-  { to: '/diagnostics', label: 'Network Diagnostics', icon: Terminal },
-  { to: '/reports', label: 'Reports', icon: FileText },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/', label: 'Dashboard', keywords: 'overview home dashboard', icon: LayoutDashboard, end: true },
+  { to: '/discovery', label: 'Network Discovery', keywords: 'devices arp scan hosts lan', icon: Radar },
+  { to: '/packets', label: 'Packet Analyzer', keywords: 'packets capture scapy tcp udp dns', icon: Activity },
+  { to: '/traffic', label: 'Traffic Analytics', keywords: 'bandwidth speed charts analytics', icon: BarChart3 },
+  { to: '/security', label: 'Security Center', keywords: 'alerts rules port scan anomaly', icon: ShieldAlert },
+  { to: '/diagnostics', label: 'Diagnostics', keywords: 'ping traceroute dns connectivity', icon: Terminal },
+  { to: '/reports', label: 'Reports', keywords: 'export csv pdf summary', icon: FileText },
+  { to: '/settings', label: 'Settings', keywords: 'config preferences trusted clear', icon: Settings },
 ];
 
 export default function DashboardLayout() {
@@ -39,7 +41,20 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [togglingDemo, setTogglingDemo] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ns-theme') === 'dark');
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('ns-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('ns-theme', 'light');
+    }
+  }, [darkMode]);
 
   const { data: statusData, refresh: refreshStatus } = usePolling(
     () => api.getNetworkStatus(),
@@ -68,7 +83,6 @@ export default function DashboardLayout() {
   const activeInterface = statusData?.active_interface || 'Detecting...';
   const monitoringActive = Boolean(statusData?.monitoring_active);
   const demoMode = Boolean(statusData?.demo_mode);
-  const health = statusData?.health || 'healthy';
 
   const handleToggleDemo = async () => {
     setTogglingDemo(true);
@@ -77,14 +91,30 @@ export default function DashboardLayout() {
       await Promise.all([refreshStatus(), refreshAlerts()]);
       window.dispatchEvent(new CustomEvent('netsentinel:data-changed'));
     } catch {
-      // handled on active pages
+      // surfaced on active page
     } finally {
       setTogglingDemo(false);
     }
   };
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return;
+    const match = NAV_ITEMS.find(
+      (item) =>
+        item.label.toLowerCase().includes(q) || item.keywords.toLowerCase().includes(q)
+    );
+    if (match) {
+      navigate(match.to);
+      setSearchQuery('');
+    } else {
+      navigate('/packets');
+    }
+  };
+
   const renderSidebarLinks = (onNavigate) => (
-    <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+    <nav className="flex-1 pl-4 py-2 space-y-1 overflow-y-auto">
       {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
@@ -92,10 +122,10 @@ export default function DashboardLayout() {
           end={end}
           onClick={onNavigate}
           className={({ isActive }) =>
-            `flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            `flex items-center justify-between gap-3 pl-4 pr-5 py-2.5 text-sm font-medium transition-all ${
               isActive
-                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/25'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent'
+                ? 'sidebar-active-tab font-semibold'
+                : 'text-slate-100/85 hover:text-white hover:bg-white/10 rounded-l-full'
             }`
           }
         >
@@ -104,7 +134,7 @@ export default function DashboardLayout() {
             <span className="truncate">{label}</span>
           </span>
           {to === '/security' && openAlertsCount > 0 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+            <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-[#e07a5f] text-white">
               {openAlertsCount}
             </span>
           )}
@@ -113,37 +143,61 @@ export default function DashboardLayout() {
     </nav>
   );
 
-  return (
-    <div className="min-h-screen flex bg-navy-950 text-slate-100">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-navy-900 border-r border-slate-800/90 z-30">
-        <div className="h-16 px-4 flex items-center gap-3 border-b border-slate-800/90">
-          <img src={logoSvg} alt="NetSentinel" className="w-8 h-8" />
-          <div className="min-w-0">
-            <div className="text-sm font-bold tracking-tight text-slate-100">NetSentinel</div>
-            <div className="text-[11px] text-slate-400 truncate">Network Operations Suite</div>
-          </div>
+  const renderSidebarProfile = () => (
+    <div className="pt-7 pb-5 px-5 flex flex-col items-center text-center">
+      <div className="w-16 h-16 rounded-full p-1 border-2 border-white/40 bg-white/10 flex items-center justify-center shadow-inner">
+        <div className="w-full h-full rounded-full bg-white text-[#244a5c] flex items-center justify-center">
+          <ShieldCheck className="w-8 h-8" />
         </div>
+      </div>
+      <div className="mt-3 text-sm font-semibold text-white tracking-tight">
+        NetSentinel
+      </div>
+      <div className="mt-0.5 text-[11px] text-sky-100/70 font-mono truncate max-w-full">
+        {activeInterface}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex bg-[#dcebf2] dark:bg-navy-950 text-slate-800 dark:text-slate-100 transition-colors">
+      {/* Desktop Deep Slate-Teal Sidebar */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-60 lg:fixed lg:inset-y-0 bg-[#244a5c] dark:bg-[#132935] text-white z-30 shadow-lg">
+        {renderSidebarProfile()}
 
         {renderSidebarLinks(undefined)}
 
-        <div className="p-3 border-t border-slate-800/90">
-          <div className="rounded-lg bg-navy-950/80 border border-slate-800 p-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Packet Capture</span>
-              <StatusBadge
-                label={monitoringActive ? 'Active' : 'Idle'}
-                variant={monitoringActive ? 'active' : 'stopped'}
-                dot
-              />
-            </div>
-            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400 font-mono truncate">
-              <Wifi className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-              <span className="truncate" title={activeInterface}>
-                {activeInterface}
-              </span>
-            </div>
+        {/* Bottom Sidebar Status / Demo Toggle Slot (matches reference bottom action) */}
+        <div className="px-5 py-4 border-t border-white/10 space-y-2.5">
+          <div className="flex items-center justify-between text-[11px] text-sky-100/80">
+            <span className="flex items-center gap-1.5">
+              <Wifi className="w-3.5 h-3.5 text-emerald-300" />
+              Capture
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                monitoringActive
+                  ? 'bg-emerald-400/20 text-emerald-200'
+                  : 'bg-white/10 text-sky-100/80'
+              }`}
+            >
+              {monitoringActive ? 'LIVE' : 'IDLE'}
+            </span>
           </div>
+
+          <button
+            type="button"
+            disabled={togglingDemo}
+            onClick={handleToggleDemo}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+              demoMode
+                ? 'bg-[#e07a5f] text-white hover:bg-[#cf6b50]'
+                : 'text-sky-100/85 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <FlaskConical className="w-4 h-4 shrink-0" />
+            <span>{demoMode ? 'Exit Demo Mode' : 'Demo Mode'}</span>
+          </button>
         </div>
       </aside>
 
@@ -151,104 +205,113 @@ export default function DashboardLayout() {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative w-64 max-w-[80vw] bg-navy-900 border-r border-slate-800 flex flex-col z-10">
-            <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <img src={logoSvg} alt="NetSentinel" className="w-8 h-8" />
-                <span className="text-sm font-bold text-slate-100">NetSentinel</span>
-              </div>
+          <aside className="relative w-64 max-w-[80vw] bg-[#244a5c] dark:bg-[#132935] text-white flex flex-col z-10 shadow-2xl">
+            <div className="flex justify-end p-3 pb-0">
               <button
                 type="button"
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg"
+                className="p-1.5 text-white/80 hover:text-white rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+            {renderSidebarProfile()}
             {renderSidebarLinks(() => setSidebarOpen(false))}
           </aside>
         </div>
       )}
 
-      {/* Main Column */}
-      <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
-        {/* Top Navigation Bar */}
-        <header className="sticky top-0 z-20 h-16 bg-navy-900/95 backdrop-blur border-b border-slate-800/90 px-4 lg:px-6 flex items-center justify-between gap-4">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col lg:pl-60 min-w-0">
+        {/* Crisp White Top Header Bar (Matches Reference) */}
+        <header className="sticky top-0 z-20 h-16 bg-white dark:bg-navy-900 border-b border-[#cfe0ea] dark:border-slate-800 px-4 lg:px-7 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-              aria-label="Open navigation menu"
+              className="lg:hidden p-2 rounded-xl text-[#244a5c] dark:text-slate-200 hover:bg-[#eef6fa] dark:hover:bg-navy-800"
+              aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-950/90 border border-slate-800 text-xs">
-              <Network className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-              <span className="text-slate-400">Interface:</span>
-              <span className="font-mono text-slate-200 max-w-[180px] truncate" title={activeInterface}>
-                {activeInterface}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <StatusBadge
-                label={
-                  monitoringActive
-                    ? 'Capturing Live'
-                    : health === 'offline'
-                    ? 'Offline'
-                    : 'Telemetry Live'
-                }
-                variant={monitoringActive ? 'active' : health === 'offline' ? 'offline' : 'healthy'}
-                dot
-              />
+            <div className="flex items-center gap-3 min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold text-[#1a3342] dark:text-slate-100 truncate">
+                Welcome to NetSentinel !
+              </h2>
+              <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#eef6fa] dark:bg-navy-800 border border-[#cde0ea] dark:border-slate-700 text-xs">
+                <Network className="w-3.5 h-3.5 text-[#244a5c] dark:text-sky-400" />
+                <span className="font-mono text-[#1f4152] dark:text-slate-200 max-w-[140px] truncate">
+                  {activeInterface}
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Demo Mode Toggle */}
+          {/* Right Controls: Pill Search Bar, Theme Pill Switch, Bell */}
+          <div className="flex items-center gap-3">
+            {/* Pill Search Input matching reference */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden md:flex items-center rounded-full border border-[#b7d1df] dark:border-slate-700 bg-white dark:bg-navy-850 overflow-hidden h-9 w-56 lg:w-64 focus-within:border-[#244a5c] dark:focus-within:border-sky-400 transition-colors"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search modules..."
+                className="flex-1 bg-transparent px-4 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className="h-full px-3.5 bg-[#dcebf2] dark:bg-navy-700 text-[#244a5c] dark:text-sky-300 hover:bg-[#cde0ea] dark:hover:bg-navy-600 transition-colors flex items-center justify-center"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </form>
+
+            {/* Theme Toggle Pill matching reference screenshot */}
             <button
               type="button"
-              disabled={togglingDemo}
-              onClick={handleToggleDemo}
-              title="Toggle clearly-labelled DEMO MODE with synthetic datasets for presentation"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                demoMode
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
-                  : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
-              }`}
+              onClick={() => setDarkMode((prev) => !prev)}
+              title={darkMode ? 'Switch to Light Slate-Teal Theme' : 'Switch to Dark Theme'}
+              className="relative inline-flex items-center justify-between w-14 h-7 rounded-full px-1.5 bg-[#dcebf2] dark:bg-navy-800 border border-[#bfd6e3] dark:border-slate-700 transition-colors"
             >
-              <FlaskConical className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">
-                {demoMode ? 'DEMO MODE: ON' : 'Demo Mode'}
+              <span
+                className={`w-5 h-5 rounded-full bg-[#244a5c] dark:bg-sky-500 text-white flex items-center justify-center shadow-sm transform transition-transform ${
+                  darkMode ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              >
+                {darkMode ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
               </span>
+              {!darkMode && <Moon className="w-3 h-3 text-[#244a5c]/70 mr-1" />}
             </button>
 
-            {/* Notifications Bell */}
+            {/* Notification Bell */}
             <div className="relative" ref={notifRef}>
               <button
                 type="button"
                 onClick={() => setNotifOpen((prev) => !prev)}
-                className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-colors"
+                className="relative p-2 rounded-full text-[#244a5c] dark:text-slate-200 hover:bg-[#eef6fa] dark:hover:bg-navy-800 transition-colors"
                 aria-label="Security notifications"
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-5 h-5" />
                 {openAlertsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-[#d96b52] text-white text-[10px] font-bold flex items-center justify-center">
                     {openAlertsCount > 99 ? '99+' : openAlertsCount}
                   </span>
                 )}
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 ns-card shadow-2xl border-slate-700 overflow-hidden z-40">
-                  <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 ns-card shadow-xl overflow-hidden z-40">
+                  <div className="px-4 py-3 border-b border-[#d6e6ef] dark:border-slate-800 flex items-center justify-between bg-[#f4f9fc] dark:bg-navy-900">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#1f4152] dark:text-slate-300">
                       Open Security Alerts
                     </span>
                     <button
@@ -257,14 +320,14 @@ export default function DashboardLayout() {
                         setNotifOpen(false);
                         navigate('/security');
                       }}
-                      className="text-xs text-sky-400 hover:text-sky-300"
+                      className="text-xs font-medium text-[#244a5c] dark:text-sky-400 hover:underline"
                     >
                       View all
                     </button>
                   </div>
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/80">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#e2edf3] dark:divide-slate-800">
                     {openAlerts.length === 0 ? (
-                      <div className="p-6 text-center text-xs text-slate-400">
+                      <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400">
                         No open security alerts right now.
                       </div>
                     ) : (
@@ -276,7 +339,7 @@ export default function DashboardLayout() {
                             setNotifOpen(false);
                             navigate('/security');
                           }}
-                          className="w-full text-left px-4 py-3 hover:bg-slate-800/50 transition-colors"
+                          className="w-full text-left px-4 py-3 hover:bg-[#f4f9fc] dark:hover:bg-navy-800/70 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <StatusBadge label={a.severity} variant={a.severity} />
@@ -284,10 +347,10 @@ export default function DashboardLayout() {
                               {formatDateTime(a.detected_at)}
                             </span>
                           </div>
-                          <div className="mt-1.5 text-xs font-medium text-slate-200 truncate">
+                          <div className="mt-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                             {a.title}
                           </div>
-                          <div className="mt-0.5 text-[11px] font-mono text-slate-400 truncate">
+                          <div className="mt-0.5 text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">
                             Src: {a.src_ip || 'N/A'}
                           </div>
                         </button>
@@ -297,53 +360,37 @@ export default function DashboardLayout() {
                 </div>
               )}
             </div>
-
-            {/* Profile / Settings Shortcut */}
-            <button
-              type="button"
-              onClick={() => navigate('/settings')}
-              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/80 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-300">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <span className="hidden md:inline text-xs font-medium text-slate-200">
-                NetAdmin
-              </span>
-            </button>
           </div>
         </header>
 
         {/* Clearly Labelled DEMO MODE Banner */}
         {demoMode && (
-          <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 lg:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200">
+          <div className="bg-[#fdf2ec] dark:bg-amber-500/15 border-b border-[#ecc3b0] dark:border-amber-500/30 px-4 lg:px-7 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#8f3f2b] dark:text-amber-200">
             <div className="flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-amber-400 shrink-0" />
+              <FlaskConical className="w-4 h-4 text-[#c95944] dark:text-amber-400 shrink-0" />
               <span>
-                <strong className="font-semibold text-amber-300">DEMO MODE ACTIVE:</strong>{' '}
-                Synthetic demonstration devices, packets, traffic, and alerts (tagged{' '}
-                <code className="font-mono bg-amber-500/20 px-1 rounded">DEMO</code>) are
-                included alongside live OS metrics. Turn off DEMO MODE anytime to view purely
-                live host data.
+                <strong className="font-semibold">DEMO MODE ACTIVE:</strong> Synthetic
+                demonstration devices, packets, traffic, and alerts (tagged{' '}
+                <code className="font-mono bg-[#f5ddd0] dark:bg-amber-500/20 px-1 rounded">DEMO</code>
+                ) are shown alongside live host telemetry.
               </span>
             </div>
             <button
               type="button"
               disabled={togglingDemo}
               onClick={handleToggleDemo}
-              className="px-2.5 py-1 rounded-md bg-amber-500/25 hover:bg-amber-500/35 text-amber-100 font-medium transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-[#c95944] text-white hover:bg-[#b24936] font-medium transition-colors"
             >
               Exit Demo Mode
             </button>
           </div>
         )}
 
-        {/* Page Content */}
+        {/* Main Workspace Canvas */}
         <main className="flex-1 p-4 lg:p-6 max-w-[1600px] w-full mx-auto">
-          <Outlet context={{ statusData, refreshStatus }} />
+          <Outlet context={{ statusData, refreshStatus, darkMode }} />
         </main>
       </div>
     </div>
   );
 }
-
